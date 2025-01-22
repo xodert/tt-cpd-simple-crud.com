@@ -98,14 +98,11 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
 
-            // Если пользователь не может редактировать артикул, генерируем его автоматически
             if (!in_array($request->user()->role, config('roles.can-edit-articles', []))) {
                 $validated['article'] = 'ART' . time();
             }
 
             $product = Product::create($validated);
-
-            SendProductCreatedNotification::dispatch($product);
 
             DB::commit();
 
@@ -113,8 +110,6 @@ class ProductController extends Controller
                 ->route('products.index')
                 ->with('success', 'Product created successfully.');
         } catch (\Exception $e) {
-
-            dd($e);
             DB::rollBack();
             logger()->error('Failed to create product: ' . $e->getMessage());
             return redirect()
