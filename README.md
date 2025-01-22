@@ -6,23 +6,19 @@ This is a test assignment for a job application that demonstrates basic CRUD ope
 
 Develop a product management system using Laravel 8+ with MySQL database that includes:
 
-1. Product listing with:
-   - Search functionality
-   - Status filtering
-   - Sorting capabilities
-
-2. Product management:
+1. Product management:
    - Create/Read/Update/Delete operations
    - Role-based article number editing
    - Soft deletes
    - Form validation
 
-3. Additional features:
+2. Additional features:
    - Email notifications via queue for new products
    - API endpoints
    - Scheduled webhook notifications
-   - Database transactions
    - Event observers
+
+3. Administration "role" 
 
 ## Features Implemented
 
