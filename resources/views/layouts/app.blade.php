@@ -15,6 +15,40 @@
         .modal {
             transition: opacity 0.25s ease;
         }
+        .modal-container {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.2s ease-out;
+        }
+        .modal.flex .modal-container {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-overlay {
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        .modal.flex .modal-overlay {
+            opacity: 0.5;
+        }
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .fade-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .fade-exit-active {
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s, transform 0.2s;
+        }
         body.modal-active {
             overflow-x: hidden;
             overflow-y: visible !important;

@@ -1,7 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-4 flex justify-end">
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col sm:flex-row gap-4 flex-grow">
+        <form method="GET" class="flex-grow max-w-md">
+            <div class="relative">
+                <input type="text"
+                       name="search"
+                       value="{{ $search }}"
+                       placeholder="Search products..."
+                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+
+        <form method="GET" class="w-full sm:w-auto">
+            <input type="hidden" name="search" value="{{ $search }}">
+            <input type="hidden" name="sort" value="{{ $sortField }}">
+            <input type="hidden" name="direction" value="{{ $sortDirection }}">
+            <select name="status"
+                    onchange="this.form.submit()"
+                    class="w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="all" {{ $currentStatus === 'all' ? 'selected' : '' }}>All Status</option>
+                <option value="available" {{ $currentStatus === 'available' ? 'selected' : '' }}>Available</option>
+                <option value="unavailable" {{ $currentStatus === 'unavailable' ? 'selected' : '' }}>Unavailable</option>
+            </select>
+        </form>
+    </div>
+
     <a href="{{ route('products.create') }}"
        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
         Add Product
@@ -13,13 +43,28 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Article</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    @foreach(['Image', 'Article', 'Name', 'Status', 'Price', 'Size'] as $column)
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ request()->fullUrlWithQuery([
+                                'sort' => strtolower($column),
+                                'direction' => ($sortField === strtolower($column) && $sortDirection === 'asc') ? 'desc' : 'asc'
+                            ]) }}" class="group inline-flex items-center">
+                                {{ $column }}
+                                @if($sortField === strtolower($column))
+                                    <span class="ml-2">
+                                        @if($sortDirection === 'asc')
+                                            ↑
+                                        @else
+                                            ↓
+                                        @endif
+                                    </span>
+                                @endif
+                            </a>
+                        </th>
+                    @endforeach
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                    </th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">

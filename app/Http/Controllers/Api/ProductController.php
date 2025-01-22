@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\Product;
-use App\Jobs\SendProductCreatedNotification;
-use App\Http\Requests\ProductRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\ProductResource;
+use App\Http\Controllers\Controller;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        $products = Product::paginate(10);
+        $products = Product::query()->paginate(10);
 
-        return view('products.index', compact('products'));
+        return new JsonResponse(
+            ProductResource::collection($products)
+        );
     }
 }
