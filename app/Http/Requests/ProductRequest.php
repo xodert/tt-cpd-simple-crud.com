@@ -14,11 +14,7 @@ class ProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if ($this->has('article')) {
-            return $this->canEditArticle();
-        }
-
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -29,32 +25,28 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => 'required|min:10',
-            'status' => 'required|in:available,unavailable',
-            'data' => 'required|array',
-            'data.price' => 'required|numeric|min:0',
-            'data.size' => 'required|string'
+            'name' => ['required', 'string', 'min:10'],
+            'status' => ['required', 'in:available,unavailable'],
+            'data' => ['required', 'array'],
+            'data.price' => ['required', 'numeric', 'min:0'],
+            'data.size' => ['required', 'string'],
         ];
 
-        if ($this->isMethod('post') || $this->has('article')) {
-            $rules['article'] = 'required|alpha_num|unique:products,article' .
-                ($this->product ? ',' . $this->product->id : '');
+        if (in_array($this->user()->role, config('roles.can-edit-articles', []))) {
+            $rules['article'] = ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'unique:products,article'];
         }
 
         return $rules;
     }
 
-    /**
-     * Check if user can edit article field.
-     *
-     * @return bool
-     */
-    private function canEditArticle(): bool
+    protected function prepareForValidation()
     {
-        return Auth::check() && in_array(
-            Auth::user()->role,
-            config('roles.can-edit-articles', [])
-        );
+        $this->merge([
+            'data' => [
+                'price' => $this->input('data.price'),
+                'size' => $this->input('data.size'),
+            ]
+        ]);
     }
 
     /**

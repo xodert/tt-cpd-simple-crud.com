@@ -71,7 +71,7 @@
             @enderror
         </div>
 
-        <div class="mb-6">
+        <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="size">
                 Size
             </label>
@@ -92,7 +92,7 @@
                 Create Product
             </button>
             <a href="{{ route('products.index') }}"
-               class="text-gray-600 hover:text-gray-900">
+               class="text-gray-600 hover:text-gray-800">
                 Cancel
             </a>
         </div>

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -92,13 +93,35 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request): RedirectResponse
     {
-        $product = Product::create($request->validated());
+        $validated = $request->validated();
 
-        SendProductCreatedNotification::dispatch($product);
+        try {
+            DB::beginTransaction();
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product created successfully.');
+            // Если пользователь не может редактировать артикул, генерируем его автоматически
+            if (!in_array($request->user()->role, config('roles.can-edit-articles', []))) {
+                $validated['article'] = 'ART' . time();
+            }
+
+            $product = Product::create($validated);
+
+            SendProductCreatedNotification::dispatch($product);
+
+            DB::commit();
+
+            return redirect()
+                ->route('products.index')
+                ->with('success', 'Product created successfully.');
+        } catch (\Exception $e) {
+
+            dd($e);
+            DB::rollBack();
+            logger()->error('Failed to create product: ' . $e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Failed to create product. Please try again.');
+        }
     }
 
     /**
@@ -123,11 +146,23 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        try {
+            DB::beginTransaction();
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product updated successfully.');
+            $product->update($request->validated());
+
+            DB::commit();
+
+            return redirect()
+                ->route('products.index')
+                ->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Failed to update product. Please try again.');
+        }
     }
 
     /**
@@ -138,11 +173,22 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): RedirectResponse
     {
-        $product->delete();
+        try {
+            DB::beginTransaction();
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product deleted successfully.');
+            $product->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('products.index')
+                ->with('success', 'Product deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to delete product. Please try again.');
+        }
     }
 
     /**

@@ -1,7 +1,5 @@
 <?php
 
 return [
-    'can-edit-articles' => [
-        'admin'
-    ]
+    'can-edit-articles' => ['admin']
 ];
